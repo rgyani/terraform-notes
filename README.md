@@ -30,6 +30,18 @@ Developers always knew that to make money, Hashicorp was investing in their own 
 **Chef, Puppet, and Ansible** are all configuration management tools, which means they are designed to **install and manage software on existing servers**.   
 **CloudFormation, Heat, Pulumi, and Terraform** are provisioning tools, which means they are designed to provision the servers themselves (as well as the rest of your infrastructure, like load balancers, databases, networking configuration, etc), leaving the job of configuring those servers to other tools. 
 
+My personal experience is with Terraform and CDK
+| CDK | Terraform |
+|---|---|
+| CDK is more friendly to developers who likely already know Typescript, Python, etc. Things like abstraction and encapsulation, code reuse are easier with CDK since you get all the benefits of these first class languages | Terraform HCL is not hard to read or learn |
+| CDK/Cloudformation drift detection just does not work as expected | Terraform State Management detects drift and can correct the change back to what the code/configuration defines| 
+| loops and conditions, functions etc are easier with CDK because you are after all using python/typescript | loops and conditions can be complex in HCL |
+| CDK uses a AWS developed lib called jsii, this marshals every non-node CDK call to call nodejs and return the result. | Terraform interacts with cloud services (AWS, Azure, GCP, etc.) via providers, which are separate executables written in Go. These providers implement Terraform's Plugin Protocol and handle the actual API calls to the cloud via standard HTtp requests |
+
+
+
+These providers implement Terraform's Plugin Protocol and handle the actual API calls to the cloud.
+
 ### What does Terraform Cloud provide
 Terraform Cloud is a platform developed by Hashicorp that helps with managing your Terraform code. It is used to enhance collaboration between developers and DevOps engineers, simplify your workflow and improve security overall around the product. 
 
@@ -186,6 +198,12 @@ resource "aws_instance" "ec2_instance" {
 }
 
 ```
+
+### Loops in Terraform
+Terraform provides multiple looping mechanisms, including:
+1. **count** (for simple indexed loops)
+2. **for_each** (for iterating over maps/sets)
+3. for **expressions** (for transformations and filtering)
 
 
 
