@@ -206,6 +206,103 @@ Terraform provides multiple looping mechanisms, including:
 3. for **expressions** (for transformations and filtering)
 
 
+#### 1. Looping with count
+count is useful when creating multiple identical resources.
+
+```hcl
+resource "aws_instance" "example" {
+  count = 3  # Creates 3 instances
+
+  ami           = "ami-12345678"
+  instance_type = "t2.micro"
+  tags = {
+    Name = "Instance-${count.index}"
+  }
+}
+```
+Terraform creates 3 instances with names Instance-0, Instance-1, Instance-2.
+
+#### 2. Looping with for_each
+for_each is more flexible than count as it works with maps and sets.
+
+```hcl
+variable "buckets" {
+  default = {
+    dev     = "dev-bucket"
+    staging = "staging-bucket"
+    prod    = "prod-bucket"
+  }
+}
+
+resource "aws_s3_bucket" "example" {
+  for_each = var.buckets
+
+  bucket = each.value
+  tags = {
+    Environment = each.key
+  }
+}
+```
+* Creates three S3 buckets: "dev-bucket", "staging-bucket", and "prod-bucket".
+* Uses each.key for environment tagging.
+
+### 3. Using for Expressions (List Transformations)
+Terraform’s for expressions allow modifying lists and maps dynamically.
+
+Example 1: Convert List to Uppercase
+```hcl
+variable "names" {
+  default = ["alice", "bob", "charlie"]
+}
+
+output "uppercase_names" {
+  value = [for name in var.names : upper(name)]
+}
+```
+Output: ["ALICE", "BOB", "CHARLIE"]
+
+Example 2: Map Filtering with Conditions
+```hcl
+variable "users" {
+  default = {
+    Alice   = "Admin"
+    Bob     = "Editor"
+    Charlie = "Viewer"
+  }
+}
+
+output "admin_users" {
+  value = { for name, role in var.users : name => role if role == "Admin" }
+}
+
+# Output:
+
+{
+  "Alice" = "Admin"
+}
+```
+* (Only users with "Admin" role are included.)
+
+#### 4. Dynamic Blocks with for_each
+You can use for_each inside dynamic blocks for dynamic resource properties.
+
+```hcl
+resource "aws_security_group" "example" {
+  name = "example-sg"
+
+  dynamic "ingress" {
+    for_each = [22, 80, 443]
+
+    content {
+      from_port   = ingress.value
+      to_port     = ingress.value
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+}
+```
+* This dynamically creates three ingress rules for ports 22, 80, and 443.
 
 ### Lets recap
 * **resource**: A resource block declares a resource of a specific type with a specific **local name**. Terraform uses the name when referring to the resource in the same module, but it has no meaning outside that module's scope.
